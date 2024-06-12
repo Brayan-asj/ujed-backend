@@ -1,5 +1,10 @@
 import { pool } from "../db.js";
 
+export const getProductsLanding = async (req, res) => {
+    const [rows] = await pool.query('SELECT nombre_producto, precio, imagen FROM productos')
+    res.json(rows);
+}
+
 export const getProducts = async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM productos');

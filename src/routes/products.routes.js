@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { getProducts, getProductName, getProductCategory, getProductAvailable, addProduct, deactivateProduct, activateProduct, updateProduct } from "../controllers/products.controller.js";
+import { getProducts, getProductName, getProductCategory, getProductAvailable, addProduct, deactivateProduct, activateProduct, updateProduct, getProductsLanding } from "../controllers/products.controller.js";
 import { verifyToken, verifyRole, verifyPermissions } from "../middleware/jwt.js";
 
 const router = Router();
+
+// Obtener productos para landing
+router.get('/productsLanding', getProductsLanding);
 
 // Filtrado de productos por (TODOS, NOMBRE, CATEGORIA Y DISPONIBILIDAD)
 router.get('/products', getProducts);
