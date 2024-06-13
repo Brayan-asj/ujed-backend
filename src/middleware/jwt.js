@@ -5,6 +5,10 @@ export const generateToken = (user) => {
     return jwt.sign(user, process.env.JWT_SECRETO, { expiresIn: process.env.JWT_EXPIRES_IN });
 }
 
+export const generateConfirmationToken = (user) => {
+    return jwt.sign(user, process.env.JWT_SECRETO, {expiresIn: '1h'});
+}
+
 export const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
 
