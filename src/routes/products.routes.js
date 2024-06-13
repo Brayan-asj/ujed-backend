@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getProducts, getProductName, getProductCategory, getProductAvailable, addProduct, deactivateProduct, activateProduct, updateProduct, getProductsLanding } from "../controllers/products.controller.js";
-import { verifyToken, verifyRole, verifyPermissions } from "../middleware/jwt.js";
+import { verifyToken } from "../middleware/jwt.js";
 
 const router = Router();
 
@@ -14,14 +14,14 @@ router.get('/products/categoria/:categoria', getProductCategory);
 router.get('/products/disponibilidad/:estatus', getProductAvailable);
 
 // Agregar Un Producto
-router.post('/products', verifyToken, verifyRole('admin' || 'cliente') || verifyPermissions('agregar_productos') , addProduct);
+router.post('/products', verifyToken, addProduct);
 
 // Desactivar un producto
-router.patch('/products/deactivate/:id', verifyToken, verifyRole('admin' || 'cliente') || verifyPermissions('desactivar_productos'), deactivateProduct);
-router.patch('/products/activate/:id', verifyToken, verifyRole('admin' || 'cliente') || verifyPermissions('activar_productos'), activateProduct);
+router.patch('/products/deactivate/:id', verifyToken, deactivateProduct);
+router.patch('/products/activate/:id', verifyToken, activateProduct);
 
 // Actualizar parcial o completamente un producto
-router.patch('/products/:id', verifyToken, verifyRole('admin' || 'cliente') || verifyPermissions('actualizar_productos'), updateProduct);
+router.patch('/products/:id', verifyToken, updateProduct);
 
 
 export default router;

@@ -23,56 +23,11 @@ export const verifyToken = (req, res, next) => {
     }
 };
 
-// VERIFICAR QUE EL USUARIO TENGA LOS PERMISOS NECESARIOS PARA LA ACCION
-export const verifyPermissions = (requiredPermission) => {
-    return async (req, res, next) => {
-        const {usuario_id} = req.user;
-        
-        try {
-            const [rows] = await pool.query(`
-            SELECT p.nombre_permiso FROM permisos p
-            JOIN rol_permisos rp ON p.permisos_id = rp.permiso_id
-            JOIN usuario_roles ur ON rp.rol_id = ur.rol_id
-            WHERE ur.usuario_id = ? AND p.nombre_permiso = ?
-            `, [usuario_id, requiredPermission]);
-            
-            if (rows.length > 0){
-                next();
-            }else{
-                return res.status(403).json({
-                    message: 'No estás autorizado a esta acción'
-                });
-            }
-        } catch (error) {
-            res.status(500).json({
-                message: 'Internal server error'
-            });
-        }
+export const requrieAdmin = (req, res, next) => {
+    if(req.user.rol !== 'admin'){
+        return res.status(403).json({
+            message: 'Acceso denegado. Solo un administrador puede realizar esta accion'
+        })
     }
-}
-
-export const verifyRole = (requiredRole) => {
-    return async (req, res, next) => {
-        const {usuario_id} = req.user;
-
-        try {
-            const [rows] = await pool.query(`
-            SELECT r.nombre_rol FROM roles r
-            JOIN usuario_roles ur ON r.rol_id = ur.rol_id
-            WHERE ur.usuario_id = ? AND r.nombre_rol = ?
-            `, [usuario_id, requiredRole]);
-
-            if (rows.length > 0) {
-                next();
-            } else {
-                res.status(403).json({
-                    message: 'No estás autorizado a esta acción'
-                })
-            }
-        } catch (error) {
-            res.status(500).json({
-                message: 'Internal server error'
-            })
-        }
-    }
+    next();
 }

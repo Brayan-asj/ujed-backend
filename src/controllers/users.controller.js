@@ -53,27 +53,6 @@ export const getUsers = async (req, res) => {
 
 };
 
-export const userRegister = async (req, res) => {
-    const { nombre_usuario, email, password, estatus } = req.body;
-    let passHash = await bcryptjs.hash(password, 8)
-
-    const userExist = await verifyUser(email);
-
-    if (userExist) {
-        res.status(400).json({
-            msg: 'El usuario ya existe'
-        })
-    } else {
-        const [rows] = await pool.query('INSERT INTO usuario (nombre_usuario, email, password, estatus) VALUES (?, ?, ?, ?)', [nombre_usuario, email, passHash, estatus]);
-        res.send({
-            usuario_id: rows.insertId,
-            nombre_usuario,
-            email,
-            password,
-            estatus
-        });
-    }
-};
 
 const verifyUser = async (vEmail) => {
     const [ver] = await pool.query('SELECT * FROM usuario WHERE email = ?', [vEmail]);
