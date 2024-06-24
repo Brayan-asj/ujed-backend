@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerClient, getClients, updateClient } from "../controllers/client.controller.js";
+import { registerClient, getClients, updateClient, deactivateClient } from "../controllers/client.controller.js";
 import { requrieAdmin, verifyToken } from "../middleware/jwt.js";
 import { confirmationRegister } from "../middleware/confirmationRegister.js";
 
@@ -13,6 +13,6 @@ router.post('/registerClientandUser', registerClient);
 
 router.patch('/updateClient/:id', verifyToken, requrieAdmin, updateClient);
 
-router.patch('/deactivateClient');
+router.patch('/deactivateClient/:id', verifyToken, requrieAdmin, deactivateClient);
 
 export default router;

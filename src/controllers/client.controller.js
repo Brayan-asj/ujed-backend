@@ -95,3 +95,27 @@ export const updateClient = async (req, res) => {
 
     res.json(verCliente[0]);
 }
+
+export const deactivateClient = async (req, res) => {
+    const clienteId = req.params.id;
+
+    const [rows] = await pool.query('UPDATE cliente SET estatus = 0, fecha_creacion = NOW() WHERE cliente_id = ?',
+        [clienteId]
+    );
+
+    if (rows.affectedRows === 0) return res.status(404).json({
+            message: 'No se pudo encontrar al cliente'
+        });
+
+    const [userRows] = await pool.query('UPDATE usuario SET estatus = 0, fecha_creacion = NOW() WHERE usuario_id = ?',
+        [clienteId]
+    )
+
+    if (userRows.affectedRows === 0) return res.status(404).json({
+            message: 'No se pudo encontrar al usuario'
+        })
+
+    return res.status(200).json({
+        message: 'Cliente y Usuario desactivado con éxito'
+    });
+}
