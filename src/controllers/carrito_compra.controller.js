@@ -44,20 +44,41 @@ export const addProductCar = async (req, res) => {
 
         }
 
-        // INSERTAR EL PRODUCTO EN EL CARRITO
-        const [detalleRows] = await pool.query(
-            'INSERT INTO detalle_carrito (FK_cliente_id, FK_carrito_compra_id, FK_producto_id, cantidad, precio) VALUES (?, ?, ?, ?, ?)',
-                [cliente_id, carrito_id, producto_id, cantidad, precio]
-            );
+        // VERIFICAR QUE EL PRODUCTO EXISTE O NO EN EL CARRITO Y SI ES ASI SUMAR LAS CANTIDADES
+        const [carritoProducto] = await pool.query('SELECT FK_producto_id, cantidad FROM detalle_carrito WHERE FK_producto_id = ? AND FK_cliente_id = ?',
+             [producto_id, cliente_id]);
 
-        res.status(201).json({
-            message: "Producto agregado al carrito",
-            detalle_id: detalleRows.insertId,
-            carrito_id: carrito_id,
-            producto_id: producto_id,
-            cantidad: cantidad,
-            precio: precio
-        });
+        if(carritoProducto.length >= 1){
+            
+            const nuevaCantidad = carritoProducto[0].cantidad + cantidad;
+
+            const [productUpdate] = await pool.query('UPDATE detalle_carrito SET cantidad = ? WHERE FK_producto_id = ? AND FK_cliente_id = ?',
+                [nuevaCantidad, producto_id, cliente_id]);
+
+            return res.status(200).json({
+                message: `Cantidad actualizada a ${nuevaCantidad}`,
+                carrito_id: carrito_id,
+                producto_id: producto_id,
+                cantidad: nuevaCantidad,
+                precio: precio
+                });
+
+        }else{
+            // INSERTAR EL PRODUCTO EN EL CARRITO CUANDO EL PRODUCTO NO EXISTE
+            const [detalleRows] = await pool.query(
+                'INSERT INTO detalle_carrito (FK_cliente_id, FK_carrito_compra_id, FK_producto_id, cantidad, precio) VALUES (?, ?, ?, ?, ?)',
+                    [cliente_id, carrito_id, producto_id, cantidad, precio]
+                );
+
+            res.status(201).json({
+                message: "Producto agregado al carrito",
+                detalle_id: detalleRows.insertId,
+                carrito_id: carrito_id,
+                producto_id: producto_id,
+                cantidad: cantidad,
+                precio: precio
+            });
+        }
 
     } catch (error) {
 
