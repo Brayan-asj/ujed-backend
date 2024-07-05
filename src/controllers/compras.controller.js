@@ -71,3 +71,110 @@ export const updateStatus = async (req, res) => {
         });
     }
 }
+
+export const getSalesReportByPeriod = async (req, res) => {
+    const {fecha_inicio, fecha_fin} = req.query;
+
+    try {
+        
+        const [rows] = await pool.query(`
+        
+            SELECT
+                cc.fecha_creacion AS fecha_compra,
+                SUM(dc.cantidad * dc.precio) AS total
+            FROM
+                carrito_compra cc
+            JOIN
+                detalle_carrito dc ON cc.carrito_compra_id = dc.FK_carrito_compra_id
+            WHERE
+                cc.fecha_creacion BETWEEN ? AND ?
+            GROUP BY
+                cc.fecha_creacion
+            ORDER BY
+                cc.fecha_creacion
+        `, [fecha_inicio, fecha_fin]);
+
+        res.status(200).json({
+            message: "Reporte de ventas por periodo",
+            report: rows
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Error al obtener el reporte de ventas por periodo"
+        });
+    }
+}
+
+export const getSalesReportByProduct = async(req, res) =>{
+    const {id} = req.params;
+
+    try {
+        
+        const [rows] = await pool.query(`
+            SELECT
+                p.nombre_producto,
+                SUM(dc.cantidad) AS cantidad_vendida,
+                SUM(dc.cantidad * dc.precio) AS total
+            FROM
+                productos p
+            JOIN
+                detalle_carrito dc ON p.producto_id = dc.FK_producto_id
+            JOIN
+                carrito_compra cc ON dc.FK_carrito_compra_id = cc.carrito_compra_id
+            WHERE
+                p.producto_id = ?
+            GROUP BY
+                p.nombre_producto
+        `, [id]);
+
+        res.status(200).json({
+            message: "Reporte de ventas por producto",
+            report: rows
+        });
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error al obtener el reporte de ventas por producto"
+        });
+    }
+}
+
+export const getSalesReportByCustomer = async(req, res) => {
+    const {customerId} = req.params;
+
+    try {
+        
+        const [rows] = await pool.query(`
+            SELECT
+                c.nombre_cliente,
+                c.apellido_cliente,
+                SUM(dc.cantidad * dc.precio) AS total
+            FROM
+                cliente c
+            JOIN
+                carrito_compra cc ON c.cliente_id = cc.FK_cliente_id
+            JOIN
+                detalle_carrito dc ON cc.carrito_compra_id = dc.fk_carrito_compra_id
+            WHERE
+                c.cliente_id = ?
+            GROUP BY
+                c.nombre_cliente, c.apellido_cliente
+            `, [customerId]);
+
+            if(rows.length === 0) return res.status(404).json({
+                message: "No se encontraron ventas para el cliente"
+            })
+
+            res.status(200).json({
+                message: "Reporte de ventas por cliente",
+                report: rows
+            });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error al obtener el reporte de ventas por cliente"
+        });
+    }
+}
