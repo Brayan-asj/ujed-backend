@@ -81,7 +81,7 @@ export const addProductCar = async (req, res) => {
         }
 
     } catch (error) {
-
+        console.log(error);
         res.status(500).json({
             message: "Error al agregar producto al carrito"
         })

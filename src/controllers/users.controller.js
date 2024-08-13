@@ -102,35 +102,3 @@ export const updateUser = async (req, res) => {
     res.json(ver[0]);
 
 };
-
-export const assignRoleToUser = async (req, res) => {
-    const {usuario_id, rol_id} = req.body;
-
-    try {
-        const [results] = await pool.query('INSERT INTO usuario_roles (usuario_id, rol_id) VALUES (?, ?)', [usuario_id, rol_id]);
-        res.json({
-            msg: 'Rol asignado satisfactoriamente',
-        });
-        console.log(results[0]);
-    } catch (error) {
-        res.status(500).json({
-            msg: 'Error al asignar un rol',
-        });
-    }
-}
-
-export const assignPermissionToRole = async (req, res) => {
-    const {rol_id, permiso_id} = req.body;
-
-    try {
-        const [results] = await pool.query('INSERT INTO rol_permisos (rol_id, permiso_id) VALUES (?, ?)', [rol_id, permiso_id]);
-        res.json({
-            msg: 'Permiso asignado satisfactoriamente',
-        })
-        console.log(results[0]);
-    } catch (error) {
-        res.status(500).json({
-            msg: 'Error al asignar el permiso',
-        });
-    }
-}

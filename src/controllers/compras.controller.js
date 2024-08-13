@@ -1,3 +1,4 @@
+import { sendChangeStatus } from "../config/emailerToCart.js";
 import { pool } from "../db.js";
 
 export const getPurchases = async (req, res) => {
@@ -49,7 +50,8 @@ export const updateStatus = async (req, res) => {
     try {
         
         const [rows] = await pool.query('SELECT * FROM carrito_compra WHERE carrito_compra_id = ?', [id]);
-
+        
+        const cliente = rows[0].FK_cliente_id;
 
         if ( rows.affectedRows === 0) res.status(400).json({
             message: "El carrito no existe"
@@ -61,11 +63,21 @@ export const updateStatus = async (req, res) => {
             message: 'No se pudo encontrar el carrito'
         })
 
+        const [clientToSend] = await pool.query(`
+            SELECT *
+            FROM usuario 
+            WHERE usuario_id = ?`, [cliente])
+
+        const email = clientToSend[0].email;
+
+        await sendChangeStatus(email, estatus);
+
         const [verStatus] = await pool.query('SELECT * FROM carrito_compra WHERE carrito_compra_id', [id]);
 
         res.json(verStatus[0]);
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({
             message: "Error al actualizar el estatus del carrito"
         });
